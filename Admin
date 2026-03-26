@@ -1,0 +1,78 @@
+-- Admin system sederhana (ServerScriptService)
+
+local admins = {
+    ["NamaKamu"] = true
+}
+
+local Players = game:GetService("Players")
+
+local function isAdmin(player)
+    return admins[player.Name]
+end
+
+Players.PlayerAdded:Connect(function(player)
+    player.Chatted:Connect(function(msg)
+        if not isAdmin(player) then return end
+
+        local args = msg:split(" ")
+        local command = args[1]:lower()
+
+        -- FLY
+        if command == ":fly" then
+            local char = player.Character
+            if char and char:FindFirstChild("HumanoidRootPart") then
+                local bodyVelocity = Instance.new("BodyVelocity")
+                bodyVelocity.Velocity = Vector3.new(0,50,0)
+                bodyVelocity.MaxForce = Vector3.new(0,math.huge,0)
+                bodyVelocity.Parent = char.HumanoidRootPart
+            end
+        end
+
+        -- FREEZE
+        if command == ":freeze" then
+            local target = Players:FindFirstChild(args[2])
+            if target and target.Character then
+                local humanoid = target.Character:FindFirstChild("Humanoid")
+                if humanoid then
+                    humanoid.WalkSpeed = 0
+                    humanoid.JumpPower = 0
+                end
+            end
+        end
+
+        -- UNFREEZE
+        if command == ":unfreeze" then
+            local target = Players:FindFirstChild(args[2])
+            if target and target.Character then
+                local humanoid = target.Character:FindFirstChild("Humanoid")
+                if humanoid then
+                    humanoid.WalkSpeed = 16
+                    humanoid.JumpPower = 50
+                end
+            end
+        end
+
+        -- KILL (untuk testing di game sendiri)
+        if command == ":kill" then
+            local target = Players:FindFirstChild(args[2])
+            if target and target.Character then
+                local humanoid = target.Character:FindFirstChild("Humanoid")
+                if humanoid then
+                    humanoid.Health = 0
+                end
+            end
+        end
+
+        -- KILL ALL (gunakan hanya di game kamu sendiri)
+        if command == ":killall" then
+            for _, p in pairs(Players:GetPlayers()) do
+                if p.Character then
+                    local humanoid = p.Character:FindFirstChild("Humanoid")
+                    if humanoid then
+                        humanoid.Health = 0
+                    end
+                end
+            end
+        end
+    end)
+end)
