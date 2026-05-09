@@ -1,0 +1,101 @@
+--[[ 
+    Custom All-in-One Menu
+    Features: Fly, Noclip, Infinite Jump, Gravity, ESP, Fullbright, TP, View
+]]
+
+local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/xHeptc/Kavo-UI-Library/main/source.lua"))()
+local Window = Library.CreateLib("My Custom Hub", "Midnight")
+
+-- LOGO CUSTOM (Ganti ID Asset di bawah)
+local Logo = Instance.new("ImageLabel")
+Logo.Image = "rbxassetid://YOUR_LOGO_ID_HERE" -- Masukkan ID Logo kamu di sini
+
+-- TAB UTAMA: MOVEMENT
+local Tab1 = Window:NewTab("Movement")
+local Section1 = Tab1:NewSection("Player Physics")
+
+Section1:NewSlider("Walkspeed", "Lari kencang", 500, 16, function(s)
+    game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = s
+end)
+
+Section1:NewSlider("Gravity", "Atur Gravitasi", 196, 0, function(s)
+    game.Workspace.Gravity = s
+end)
+
+Section1:NewToggle("Infinite Jump", "Loncat tanpa batas", function(state)
+    _G.InfJump = state
+    game:GetService("UserInputService").JumpRequest:Connect(function()
+        if _G.InfJump then
+            game.Players.LocalPlayer.Character:FindFirstChildOfClass('Humanoid'):ChangeState("Jumping")
+        end
+    end)
+end)
+
+-- TAB FITUR: VISUAL & WORLD
+local Tab2 = Window:NewTab("Visual & World")
+local Section2 = Tab2:NewSection("Lighting & ESP")
+
+Section2:NewButton("Fullbright", "Hapus kegelapan", function()
+    game:GetService("Lighting").Brightness = 2
+    game:GetService("Lighting").ClockTime = 14
+    game:GetService("Lighting").FogEnd = 100000
+    game:GetService("Lighting").GlobalShadows = false
+end)
+
+Section2:NewButton("ESP Players", "Lihat player tembus dinding", function()
+    -- Sederhana ESP menggunakan Highlights
+    for _, v in pairs(game.Players:GetPlayers()) do
+        if v ~= game.Players.LocalPlayer and v.Character then
+            local highlight = Instance.new("Highlight", v.Character)
+            highlight.FillColor = Color3.fromRGB(255, 0, 0)
+        end
+    end
+end)
+
+-- TAB FITUR: UTILITY
+local Tab3 = Window:NewTab("Utility")
+local Section3 = Tab3:NewSection("Abilities")
+
+Section3:NewButton("Fly (Press E)", "Terbang", function()
+    -- Script fly standar (loadstring external sering digunakan untuk Fly yang stabil)
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/XNEOFF/FlyGuiV3/main/FlyGuiV3.lua"))()
+end)
+
+Section3:NewToggle("Noclip", "Tembus tembok", function(state)
+    _G.Noclip = state
+    game:GetService("RunService").Stepped:Connect(function()
+        if _G.Noclip then
+            for _, v in pairs(game.Players.LocalPlayer.Character:GetDescendants()) do
+                if v:IsA("BasePart") then v.CanCollide = false end
+            end
+        end
+    end)
+end)
+
+Section3:NewButton("Get All Tools", "Ambil tools dari Workspace", function()
+    for _, v in pairs(game.Workspace:GetChildren()) do
+        if v:IsA("BackpackItem") then
+            v.Parent = game.Players.LocalPlayer.Backpack
+        end
+    end
+end)
+
+-- TAB TELEPORT
+local Tab4 = Window:NewTab("Teleport")
+local Section4 = Tab4:NewSection("Player TP")
+
+Section4:NewTextBox("TP to Player", "Masukkan nama player", function(txt)
+    local target = game.Players:FindFirstChild(txt)
+    if target then
+        game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = target.Character.HumanoidRootPart.CFrame
+    end
+end)
+
+Section4:NewTextBox("View Player", "Intip kamera player", function(txt)
+    local target = game.Players:FindFirstChild(txt)
+    if target then
+        game.Workspace.CurrentCamera.CameraSubject = target.Character.Humanoid
+    else
+        game.Workspace.CurrentCamera.CameraSubject = game.Players.LocalPlayer.Character.Humanoid
+    end
+end)
