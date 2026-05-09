@@ -1,0 +1,130 @@
+local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+
+local Window = Rayfield:CreateWindow({
+   Name = "Custom Hub | Premium Edition",
+   LoadingTitle = "Memuat Script...",
+   LoadingSubtitle = "by Gemini AI",
+   ConfigurationSaving = {
+      Enabled = true,
+      FolderName = "GeminiHub"
+   }
+})
+
+-- Variables
+local Player = game.Players.LocalPlayer
+local Character = Player.Character or Player.CharacterAdded:Wait()
+local Humanoid = Character:WaitForChild("Humanoid")
+
+-- Tab Utama
+local MainTab = Window:CreateTab("Movement", 4483362458) -- Icon ID
+
+-- Infinite Jump
+local InfiniteJumpEnabled = false
+game:GetService("UserInputService").JumpRequest:Connect(function()
+    if InfiniteJumpEnabled then
+        Humanoid:ChangeState("Jumping")
+    end
+end)
+
+MainTab:CreateToggle({
+   Name = "Infinite Jump",
+   CurrentValue = false,
+   Callback = function(Value)
+      InfiniteJumpEnabled = Value
+   end,
+})
+
+-- Noclip
+local NoclipEnabled = false
+game:GetService("RunService").Stepped:Connect(function()
+    if NoclipEnabled then
+        for _, v in pairs(Character:GetDescendants()) do
+            if v:IsA("BasePart") then
+                v.CanCollide = false
+            end
+        end
+    end
+end)
+
+MainTab:CreateToggle({
+   Name = "Noclip",
+   CurrentValue = false,
+   Callback = function(Value)
+      NoclipEnabled = Value
+   end,
+})
+
+-- Visual Tab (ESP & Brightness)
+local VisualTab = Window:CreateTab("Visuals", 4483345998)
+
+VisualTab:CreateButton({
+   Name = "Fullbright (Pencahayaan Terang)",
+   Callback = function()
+      game:GetService("Lighting").Brightness = 2
+      game:GetService("Lighting").ClockTime = 14
+      game:GetService("Lighting").FogEnd = 100000
+      game:GetService("Lighting").GlobalShadows = false
+   end,
+})
+
+VisualTab:CreateButton({
+   Name = "Simple ESP (Box)",
+   Callback = function()
+      for _, v in pairs(game.Players:GetPlayers()) do
+          if v ~= Player and v.Character and v.Character:FindFirstChild("HumanoidRootPart") then
+              local Box = Instance.new("BoxHandleAdornment")
+              Box.Size = v.Character.HumanoidRootPart.Size + Vector3.new(0.1, 1, 0.1)
+              Box.AlwaysOnTop = true
+              Box.ZIndex = 5
+              Box.Adornee = v.Character.HumanoidRootPart
+              Box.Color3 = Color3.fromRGB(255, 0, 0)
+              Box.Transparency = 0.5
+              Box.Parent = v.Character.HumanoidRootPart
+          end
+      end
+   end,
+})
+
+-- Teleport & Stats Tab
+local TeleportTab = Window:CreateTab("Stats & TP", 4483345998)
+
+local CoordLabel = TeleportTab:CreateLabel("Koordinat: 0, 0, 0")
+task.spawn(function()
+    while task.wait(0.5) do
+        local pos = Character.HumanoidRootPart.Position
+        CoordLabel:SetText(string.format("Koordinat: %.1f, %.1f, %.1f", pos.X, pos.Y, pos.Z))
+    end
+end)
+
+TeleportTab:CreateButton({
+   Name = "Get All Tools (BETA)",
+   Callback = function()
+      for _, v in pairs(game:GetDescendants()) do
+          if v:IsA("Tool") or v:IsA("HopperBin") then
+              v.Parent = Player.Backpack
+          end
+      end
+   end,
+})
+
+-- Admin/Control Tab
+local AdminTab = Window:CreateTab("Admin/Other", 4483362458)
+
+AdminTab:CreateButton({
+   Name = "Freeze Player (Anchor)",
+   Callback = function()
+      Character.HumanoidRootPart.Anchored = not Character.HumanoidRootPart.Anchored
+   end,
+})
+
+AdminTab:CreateButton({
+   Name = "Fly (Basic)",
+   Callback = function()
+      -- Sederhananya menggunakan BodyVelocity (Script Fly sangat panjang, ini base-nya)
+      local bv = Instance.new("BodyVelocity", Character.HumanoidRootPart)
+      bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+      bv.Velocity = Vector3.new(0, 50, 0)
+      task.wait(2)
+      bv:Destroy()
+   end,
+})
