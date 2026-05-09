@@ -1,0 +1,136 @@
+-- [[ CUSTOMIZABLE ADMIN GUI WITH GET TOOLS ]] --
+
+local player = game.Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local backpack = player:WaitForChild("Backpack")
+
+-- Create GUI Elements
+local screenGui = script.Parent
+local frame = Instance.new("Frame")
+local logo = Instance.new("ImageLabel")
+local inputField = Instance.new("TextBox")
+local tpButton = Instance.new("TextButton")
+local viewButton = Instance.new("TextButton")
+local gravButton = Instance.new("TextButton")
+local lightButton = Instance.new("TextButton")
+local toolsButton = Instance.new("TextButton") -- Tombol Baru
+
+-- 1. Setup Frame (Diperpanjang sedikit untuk tombol baru)
+frame.Name = "AdminPanel"
+frame.Size = UDim2.new(0, 200, 0, 340)
+frame.Position = UDim2.new(0.5, -100, 0.4, 0)
+frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+frame.BorderSizePixel = 0
+frame.Active = true
+frame.Draggable = true 
+frame.Parent = screenGui
+
+-- 2. Custom Logo (Ganti ID di bawah)
+logo.Name = "CustomLogo"
+logo.Size = UDim2.new(0, 50, 0, 50)
+logo.Position = UDim2.new(0.5, -25, 0, 10)
+logo.BackgroundTransparency = 1
+logo.Image = "rbxassetid://123456789" -- MASUKKAN ID LOGO KAMU DI SINI
+logo.Parent = frame
+
+-- 3. Input Field
+inputField.Size = UDim2.new(0.8, 0, 0, 30)
+inputField.Position = UDim2.new(0.1, 0, 0.25, 0)
+inputField.PlaceholderText = "Nama Player..."
+inputField.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+inputField.TextColor3 = Color3.new(1, 1, 1)
+inputField.Parent = frame
+
+-- Helper Function: Cari Player
+local function getPlr(name)
+	for _, v in pairs(game.Players:GetPlayers()) do
+		if v.Name:lower():sub(1, #name) == name:lower() then
+			return v
+		end
+	end
+end
+
+-- [[ FITUR: GET TOOLS ]] --
+toolsButton.Size = UDim2.new(0.8, 0, 0, 30)
+toolsButton.Position = UDim2.new(0.1, 0, 0.38, 0)
+toolsButton.Text = "Get All Tools"
+toolsButton.BackgroundColor3 = Color3.fromRGB(0, 120, 0)
+toolsButton.TextColor3 = Color3.new(1, 1, 1)
+toolsButton.Parent = frame
+
+toolsButton.MouseButton1Click:Connect(function()
+	local locations = {game.Lighting, game.ReplicatedStorage}
+	local found = 0
+	
+	for _, loc in pairs(locations) do
+		for _, item in pairs(loc:GetDescendants()) do
+			if item:IsA("Tool") or item:IsA("HopperBin") then
+				local clone = item:Clone()
+				clone.Parent = backpack
+				found = found + 1
+			end
+		end
+	end
+	print("Berhasil mengambil " .. found .. " tools!")
+end)
+
+-- [[ FITUR LAINNYA ]] --
+
+-- Teleport
+tpButton.Size = UDim2.new(0.8, 0, 0, 30)
+tpButton.Position = UDim2.new(0.1, 0, 0.50, 0)
+tpButton.Text = "Teleport To"
+tpButton.Parent = frame
+tpButton.MouseButton1Click:Connect(function()
+	local target = getPlr(inputField.Text)
+	if target and target.Character then
+		player.Character.HumanoidRootPart.CFrame = target.Character.HumanoidRootPart.CFrame
+	end
+end)
+
+-- View
+local viewing = false
+viewButton.Size = UDim2.new(0.8, 0, 0, 30)
+viewButton.Position = UDim2.new(0.1, 0, 0.62, 0)
+viewButton.Text = "View Player"
+viewButton.Parent = frame
+viewButton.MouseButton1Click:Connect(function()
+	if not viewing then
+		local target = getPlr(inputField.Text)
+		if target and target.Character then
+			workspace.CurrentCamera.CameraSubject = target.Character.Humanoid
+			viewButton.Text = "Stop Viewing"
+			viewing = true
+		end
+	else
+		workspace.CurrentCamera.CameraSubject = player.Character.Humanoid
+		viewButton.Text = "View Player"
+		viewing = false
+	end
+end)
+
+-- Gravity
+local lowGrav = false
+gravButton.Size = UDim2.new(0.8, 0, 0, 30)
+gravButton.Position = UDim2.new(0.1, 0, 0.74, 0)
+gravButton.Text = "Low Gravity"
+gravButton.Parent = frame
+gravButton.MouseButton1Click:Connect(function()
+	workspace.Gravity = lowGrav and 196.2 or 50
+	lowGrav = not lowGrav
+	gravButton.Text = lowGrav and "Normal Gravity" or "Low Gravity"
+end)
+
+-- Fullbright
+local fbOn = false
+lightButton.Size = UDim2.new(0.8, 0, 0, 30)
+lightButton.Position = UDim2.new(0.1, 0, 0.86, 0)
+lightButton.Text = "Fullbright"
+lightButton.Parent = frame
+lightButton.MouseButton1Click:Connect(function()
+	fbOn = not fbOn
+	game.Lighting.Brightness = fbOn and 2 or 1
+	game.Lighting.GlobalShadows = not fbOn
+	game.Lighting.ClockTime = fbOn and 14 or 12
+	lightButton.Text = fbOn and "Normal Light" or "Fullbright"
+end)
